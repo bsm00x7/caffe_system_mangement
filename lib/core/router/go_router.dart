@@ -24,7 +24,8 @@ final router = GoRouter(
     }
 
     // if user  not admin go to Screen Employer
-    if (user != null && user.userMetadata['admin']=0){
+    if (user != null && user.userMetadata?['admin']==0){
+      return '/screenEmplyer';
 
     }
 

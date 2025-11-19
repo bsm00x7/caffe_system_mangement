@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:herfay/data/db/data.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/db/auth.dart';
 import '../../../model/user_model.dart';
@@ -27,10 +28,7 @@ class ScreenUserController extends ChangeNotifier {
 
     try {
       // Get users from Supabase 'users' table
-      final response = await _supabase
-          .from('users')
-          .select()
-          .order('created_at', ascending: false);
+      final response = Data.getAllUser();
 
       users = (response as List)
           .map((userData) => UserModel.toUserModel(userData))
