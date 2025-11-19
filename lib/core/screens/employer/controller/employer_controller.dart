@@ -1,24 +1,37 @@
 import 'package:flutter/cupertino.dart';
-import 'package:herfay/data/db/data.dart';
-import 'package:herfay/model/item_model.dart';
 
-class EmployerController extends ChangeNotifier{
+import '../../../../data/db/data.dart';
+import '../../../../model/item_model.dart';
 
-  int number_item =0;
-
+class EmployerController extends ChangeNotifier {
   List<ItemModel> items = [];
+  List<int> itemCount = []; // counter for each item
 
-  EmployerController(){
+  EmployerController() {
     loadItem();
   }
 
-  void loadItem() async{
-    debugPrint("hello");
-    final response =await Data.getAllItem();
-    debugPrint(response.length.toString());
+  void loadItem() async {
+    final response = await Data.getAllItem();
     items = (response as List)
         .map((itemData) => ItemModel.toItemModel(itemData))
         .toList();
+
+    // initialize counters with 0
+    itemCount = List.filled(items.length, 0);
+
     notifyListeners();
+  }
+
+  void incrementItem(int index) {
+    itemCount[index]++;
+    notifyListeners();
+  }
+
+  void decrementItem(int index) {
+    if (itemCount[index] > 0) {
+      itemCount[index]--;
+      notifyListeners();
+    }
   }
 }

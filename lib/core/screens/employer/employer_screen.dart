@@ -12,8 +12,6 @@ class EmployerScreen extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (BuildContext context) => EmployerController(),
       child: Scaffold(
-       
-
         appBar: AppBar(
           title: Text(
             Auth.currentUser()!.userMetadata!['name'],
@@ -77,7 +75,6 @@ class EmployerScreen extends StatelessWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-
                                   ],
                                 ),
                               ),
@@ -89,21 +86,26 @@ class EmployerScreen extends StatelessWidget {
                                     MainAxisAlignment.spaceAround,
                                 children: [
                                   ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () => value.incrementItem(index),
                                     child: Text("+"),
                                   ),
                                   CircleAvatar(
-                                    child:  Text(value.number_item.toString()),
+                                    child: Text(
+                                      value.itemCount[index].toString(),
+                                    ),
                                   ),
 
                                   ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () => value.decrementItem(index),
                                     child: Text("-"),
                                   ),
                                 ],
                               ),
                               SizedBox(height: 20),
-                              ElevatedButton(onPressed: (){}, child: Text("Confirme"))
+                              ElevatedButton(
+                                onPressed: () {},
+                                child: Text("Confirme"),
+                              ),
                             ],
                           ),
                         ),
