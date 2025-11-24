@@ -25,7 +25,7 @@ class StockController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final response = await Data.getAllItem();
+      final response = await Data.getAllItems();
       items = (response as List)
           .map((itemData) => ItemModel.toItemModel(itemData))
           .toList();

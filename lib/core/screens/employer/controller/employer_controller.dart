@@ -36,7 +36,7 @@ class EmployerController extends ChangeNotifier {
       errorMessage = null;
       notifyListeners();
 
-      final response = await Data.getAllItem();
+      final response = await Data.getAllItems();
       items = (response as List)
           .map((itemData) => ItemModel.toItemModel(itemData))
           .toList();
