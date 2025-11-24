@@ -1,61 +1,63 @@
-import 'package:flutter/cupertino.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
 class Auth {
-  static final _instance = Supabase.instance.client;
-
-  static Session? get session => _instance.auth.currentSession;
-
-  static bool checkSession() {
-    return session != null;
-  }
-
+  static final SupabaseClient _supabase = Supabase.instance.client;
+  // Get current user
   static User? currentUser() {
-    return _instance.auth.currentUser;
+    return _supabase.auth.currentUser;
   }
-
+  // Sign up new user
   static Future<AuthResponse> signUp({
     required String email,
     required String password,
-    required Map<String, dynamic> metadata,
+    Map<String, dynamic>? metadata,
   }) async {
-    return await _instance.auth.signUp(
-      password: password,
+    return await _supabase.auth.signUp(
       email: email,
+      password: password,
       data: metadata,
     );
   }
-
+  // Sign in
   static Future<AuthResponse> signIn({
     required String email,
     required String password,
   }) async {
-    return await _instance.auth.signInWithPassword(
-      password: password,
+    return await _supabase.auth.signInWithPassword(
       email: email,
+      password: password,
     );
   }
-
+  // Sign out
   static Future<void> signOut() async {
-    await _instance.auth.signOut();
+    await _supabase.auth.signOut();
   }
-
+  // Check if user is admin
+  static Future<bool> isAdmin() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return false;
+    final response = await _supabase
+        .from('users')
+        .select('is_admin')
+        .eq('id', user.id)
+        .single();
+    return response['is_admin'] ?? false;
+  }
+  // Update user metadata
+  static Future<UserResponse> updateUser({
+    String? email,
+    String? password,
+    Map<String, dynamic>? data,
+  }) async {
+    return await _supabase.auth.updateUser(
+      UserAttributes(
+        email: email,
+        password: password,
+        data: data,
+      ),
+    );
+  }
+  // Reset password
   static Future<void> resetPassword(String email) async {
-    await _instance.auth.resetPasswordForEmail(email);
-  }
-}
-
-
-// This class for listener if user login user logout
-class AuthNotifier extends ChangeNotifier {
-  AuthNotifier() {
-    // Initialize listener in constructor
-    _initAuthListener();
-  }
-
-  void _initAuthListener() {
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      notifyListeners();
-    });
+    await _supabase.auth.resetPasswordForEmail(email);
   }
 }

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../utils/loading/loading.dart';
 import '../../utils/widgets/text_form_field.dart';
+
 const colorizeColors = [
   Color(0xFF8B5CF6),
   Color(0xFF3B82F6),
@@ -22,13 +23,14 @@ const colorizeTextStyle = TextStyle(
   letterSpacing: 1.2,
 );
 
-class LoginScreen extends StatelessWidget{
+class LoginScreen extends StatelessWidget {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
-   LoginScreen({super.key});
+
+  LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return   Scaffold(
+    return Scaffold(
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -134,7 +136,7 @@ class LoginScreen extends StatelessWidget{
 
                   const SizedBox(height: 40),
 
-                  // Sign Up Card
+                  // Login Card
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -166,14 +168,14 @@ class LoginScreen extends StatelessWidget{
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: const Icon(
-                                Icons.person_add_rounded,
+                                Icons.login_rounded,
                                 color: Colors.white,
                                 size: 28,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              "Login in Your",
+                              "Login to Your Account",
                               style: GoogleFonts.poppins(
                                 color: Color(0xFF1E293B),
                                 fontSize: 28,
@@ -186,7 +188,7 @@ class LoginScreen extends StatelessWidget{
                         const SizedBox(height: 8),
 
                         Text(
-                          "Join us to manage your coffee business",
+                          "Welcome back to manage your business",
                           style: GoogleFonts.inter(
                             color: Color(0xFF64748B),
                             fontSize: 14,
@@ -201,10 +203,8 @@ class LoginScreen extends StatelessWidget{
                           key: _key,
                           child: Column(
                             children: [
-
-                              const SizedBox(height: 20),
                               TextFormFieldWidget(
-                                controller:context.read<LoginController>().email,
+                                controller: context.read<LoginController>().email,
                                 validator: (String? value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter your email';
@@ -225,16 +225,15 @@ class LoginScreen extends StatelessWidget{
                               const SizedBox(height: 20),
 
                               TextFormFieldWidget(
-                                controller:  context.read<LoginController>().password,
+                                controller: context.read<LoginController>().password,
                                 validator: (String? value) {
                                   if (value == null || value.isEmpty) {
                                     return 'Please enter a password';
                                   }
-
                                   return null;
                                 },
                                 labelText: 'Password',
-                                hintText: 'Enter Your Password',
+                                hintText: 'Enter your password',
                                 prefixIcon: const Icon(
                                   Icons.lock_outline_rounded,
                                   color: Color(0xFF3B82F6),
@@ -244,20 +243,18 @@ class LoginScreen extends StatelessWidget{
 
                               const SizedBox(height: 32),
 
-                              // Sign Up Button
+                              // Login Button
                               SizedBox(
                                 width: double.infinity,
                                 height: 56,
                                 child: ElevatedButton(
-                                  onPressed: () async{
+                                  onPressed: () async {
                                     if (_key.currentState!.validate()) {
-                                      LoadingWidget.showDialog(context, message: "Login account...");
+                                      LoadingWidget.showDialog(context, message: "Logging in...");
                                       await context.read<LoginController>().login(context: context);
-                                      if (context.mounted){
+                                      if (context.mounted) {
                                         LoadingWidget.hideDialog(context);
                                       }
-
-
                                     }
                                   },
                                   style: ElevatedButton.styleFrom(
@@ -289,12 +286,12 @@ class LoginScreen extends StatelessWidget{
 
                               const SizedBox(height: 20),
 
-                              // Sign In Link
+                              // Sign Up Link
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    "I'dont have an account? ",
+                                    "Don't have an account? ",
                                     style: GoogleFonts.inter(
                                       color: Color(0xFF64748B),
                                       fontSize: 14,
@@ -337,5 +334,4 @@ class LoginScreen extends StatelessWidget{
       ),
     );
   }
-
 }

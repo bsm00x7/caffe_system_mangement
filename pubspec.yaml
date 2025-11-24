@@ -44,6 +44,15 @@ dependencies:
   password_validator_package: ^0.0.1
   flutter_slider_drawer: ^3.0.2
   uuid: ^4.5.2
+  
+  # Performance & UI enhancements
+  cached_network_image: ^3.3.1
+  shimmer: ^3.0.0
+  fl_chart: ^0.68.0
+  pdf: ^3.11.1
+  image_picker: ^1.1.2
+  flutter_cache_manager: ^3.4.1
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:

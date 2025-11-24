@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../data/db/auth.dart';
 import '../../../model/user_model.dart';
 
+enum UserFilter { all, admins, employers }
 
 class ScreenUserController extends ChangeNotifier {
   final TextEditingController name = TextEditingController();
@@ -13,8 +14,11 @@ class ScreenUserController extends ChangeNotifier {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   List<UserModel> users = [];
+  List<UserModel> filteredUsers = [];
   bool isLoading = false;
   String? errorMessage;
+  String searchQuery = '';
+  UserFilter selectedFilter = UserFilter.all;
 
   ScreenUserController() {
     loadUsers();
@@ -28,11 +32,20 @@ class ScreenUserController extends ChangeNotifier {
 
     try {
       // Get users from Supabase 'users' table
-      final response = Data.getAllUser();
+      final response = await Data.getAllUser();
 
       users = (response as List)
           .map((userData) => UserModel.toUserModel(userData))
           .toList();
+
+      // Sort by created date (newest first)
+      users.sort((a, b) {
+        if (a.createdAt == null) return 1;
+        if (b.createdAt == null) return -1;
+        return b.createdAt!.compareTo(a.createdAt!);
+      });
+
+      _applyFilters();
 
       isLoading = false;
       notifyListeners();
@@ -58,40 +71,45 @@ class ScreenUserController extends ChangeNotifier {
     try {
       // Create user in Supabase Auth
       final AuthResponse authResponse = await Auth.signUp(
-          email: email.text, password: password.text, metadata: {
-        'name': name.text,
-        'admin': 0});
+        email: email.text.trim(),
+        password: password.text.trim(),
+        metadata: {
+          'name': name.text.trim(),
+          'admin': 0,
+        },
+      );
 
+      if (authResponse.user == null) {
+        throw Exception("Failed to create user");
+      }
 
-    if (authResponse.user == null) {
-    throw Exception("Failed to create user");
-    }
+      String userId = authResponse.user!.id;
 
-    String userId = authResponse.user!.id;
-    debugPrint(userId);
-    // Create user model
-    UserModel newUser = UserModel(
-    id: userId,
-    name: name.text.trim(),
-    email: email.text.trim(),
-      profile_image_url: null,
-    );
+      // Create user model
+      UserModel newUser = UserModel(
+        id: userId,
+        name: name.text.trim(),
+        email: email.text.trim(),
+        profileImageUrl: null,
+        isAdmin: false,
+        createdAt: DateTime.now(),
+      );
 
-    // Save user data to Supabase 'users' table
-    await _supabase.from('users').insert(newUser.toJson());
+      // Save user data to Supabase 'users' table
+      await _supabase.from('users').insert(newUser.toJson());
 
-    // Reload users to get updated list
-    await loadUsers();
+      // Reload users to get updated list
+      await loadUsers();
 
-    clearFields();
-    isLoading = false;
-    notifyListeners();
-    return true;
+      clearFields();
+      isLoading = false;
+      notifyListeners();
+      return true;
     } catch (e) {
-    errorMessage = "Failed to add user: ${e.toString()}";
-    isLoading = false;
-    notifyListeners();
-    return false;
+      errorMessage = "Failed to add user: ${e.toString()}";
+      isLoading = false;
+      notifyListeners();
+      return false;
     }
   }
 
@@ -117,13 +135,6 @@ class ScreenUserController extends ChangeNotifier {
         'name': name.text.trim(),
         'email': email.text.trim(),
       }).eq('id', userId);
-
-      // Update Auth email if changed
-      if (email.text.trim() != users[index].email) {
-        await _supabase.auth.updateUser(
-          UserAttributes(email: email.text.trim()),
-        );
-      }
 
       // Reload users to get updated list
       await loadUsers();
@@ -154,10 +165,9 @@ class ScreenUserController extends ChangeNotifier {
       // Delete from users table
       await _supabase.from('users').delete().eq('id', userId);
 
-
-
       // Remove from local list
       users.removeAt(index);
+      _applyFilters();
 
       isLoading = false;
       notifyListeners();
@@ -170,6 +180,37 @@ class ScreenUserController extends ChangeNotifier {
     }
   }
 
+  // Search users by name or email
+  void searchUsers(String query) {
+    searchQuery = query.toLowerCase();
+    _applyFilters();
+    notifyListeners();
+  }
+
+  // Set filter
+  void setFilter(UserFilter filter) {
+    selectedFilter = filter;
+    _applyFilters();
+    notifyListeners();
+  }
+
+  // Apply search and filters
+  void _applyFilters() {
+    filteredUsers = users.where((user) {
+      // Apply search filter
+      bool matchesSearch = searchQuery.isEmpty ||
+          user.name.toLowerCase().contains(searchQuery) ||
+          user.email.toLowerCase().contains(searchQuery);
+
+      // Apply role filter
+      bool matchesRole = selectedFilter == UserFilter.all ||
+          (selectedFilter == UserFilter.admins && user.isAdmin == true) ||
+          (selectedFilter == UserFilter.employers && user.isAdmin == false);
+
+      return matchesSearch && matchesRole;
+    }).toList();
+  }
+
   // Load user data for editing
   void loadUserForEdit(int index) {
     if (index >= 0 && index < users.length) {
@@ -178,6 +219,12 @@ class ScreenUserController extends ChangeNotifier {
       email.text = user.email;
       password.clear(); // Don't load password for security
     }
+  }
+
+  // Clear error message
+  void clearError() {
+    errorMessage = null;
+    notifyListeners();
   }
 
   // Clear all text fields

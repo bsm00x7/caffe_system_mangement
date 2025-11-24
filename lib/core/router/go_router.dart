@@ -1,4 +1,3 @@
-
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import '../../data/db/auth.dart';
@@ -11,9 +10,7 @@ import '../screens/login/login_screen.dart';
 
 // GoRouter configuration
 final router = GoRouter(
-  refreshListenable: AuthNotifier(),
   redirect: (context, state) {
-
     final user = Auth.currentUser();
     final loggingIn = state.matchedLocation == '/login';
     final signingUp = state.matchedLocation == '/signUp';
@@ -23,15 +20,13 @@ final router = GoRouter(
       return '/login';  // Redirect to login
     }
 
-    // if user  not admin go to Screen Employer
-    if (user != null && user.userMetadata?['admin']==0){
+    // if user not admin go to Screen Employer
+    if (user != null && user.userMetadata?['admin'] == 0) {
       return '/screenEmplyer';
-
     }
 
     // If user IS logged in and trying to access auth pages
     if (user != null && (loggingIn || signingUp)) {
-
       return '/';  // Redirect to home (BottomNavigationBarWidget)
     }
 
@@ -52,7 +47,7 @@ final router = GoRouter(
     ),
     GoRoute(
       path: '/screenEmplyer',
-      builder: (context, state) => EmployerScreen(),
+      builder: (context, state) => const EmployerScreen(),
     ),
     GoRoute(
       path: '/login',

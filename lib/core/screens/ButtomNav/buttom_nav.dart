@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:herfay/core/theme/theme_config.dart';
 import 'package:herfay/core/screens/stock/stock_screen.dart';
 import 'package:herfay/core/screens/user_screen/users_page.dart';
 import '../home/home_page.dart';
@@ -17,43 +18,121 @@ class _BottomNavigationBarWidgetState extends State<BottomNavigationBarWidget> {
 
   final List<Widget> screens = [
     HomePage(),
-    UsersPage(),
-    StockScreen(),
-    AddStockScreen(),
+    const UsersPage(),
+    const StockScreen(),
+    const AddStockScreen(),
   ];
+
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: .symmetric(horizontal: 12, vertical: 30),
-        child: screens[_currentIndex],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        showSelectedLabels: true,
-        selectedItemColor: Colors.black,
-        selectedLabelStyle: TextStyle(
-          fontFamily: 'Roboto',
-          color: Colors.black,
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-        ),
+      backgroundColor: AppTheme.backgroundColor,
+      appBar: AppBar(
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
         elevation: 0,
-        unselectedIconTheme: IconThemeData(color: Colors.black),
-        selectedIconTheme: IconThemeData(color: Colors.blue, size: 30),
-        currentIndex: _currentIndex,
-        onTap: (value) {
-          setState(() {
-            _currentIndex = value;
-          });
-        },
+        backgroundColor: Colors.white,
+      ),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: screens,
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppTheme.spacingS,
+              vertical: AppTheme.spacingXS,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildNavItem(
+                  icon: Icons.home_rounded,
+                  label: 'Home',
+                  index: 0,
+                ),
+                _buildNavItem(
+                  icon: Icons.people_rounded,
+                  label: 'Users',
+                  index: 1,
+                ),
+                _buildNavItem(
+                  icon: Icons.inventory_rounded,
+                  label: 'Stock',
+                  index: 2,
+                ),
+                _buildNavItem(
+                  icon: Icons.add_circle_rounded,
+                  label: 'Add',
+                  index: 3,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_filled), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Users'),
-          BottomNavigationBarItem(icon: Icon(Icons.storage), label: 'Stock'),
-          BottomNavigationBarItem(icon: Icon(Icons.add), label: 'add Stock'),
-        ],
+  Widget _buildNavItem({
+    required IconData icon,
+    required String label,
+    required int index,
+  }) {
+    final isSelected = _currentIndex == index;
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _currentIndex = index;
+        });
+      },
+      borderRadius: BorderRadius.circular(AppTheme.radiusM),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: EdgeInsets.symmetric(
+          horizontal: isSelected ? AppTheme.spacingM : AppTheme.spacingS,
+          vertical: AppTheme.spacingS,
+        ),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.primaryColor.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppTheme.radiusM),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppTheme.primaryColor : AppTheme.textSecondary,
+              size: 26,
+            ),
+            if (isSelected) ...[
+              const SizedBox(width: AppTheme.spacingXS),
+              Text(
+                label,
+                style: AppTheme.bodyMedium.copyWith(
+                  color: AppTheme.primaryColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ],
+        ),
       ),
     );
   }
